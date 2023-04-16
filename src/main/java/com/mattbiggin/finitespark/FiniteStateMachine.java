@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static java.util.Collections.unmodifiableMap;
+
 public class FiniteStateMachine {
     private final StateTransitionTable transitions;
 
@@ -30,8 +32,8 @@ public class FiniteStateMachine {
         private final Map<State, Map<Event, Transition>> transitions = new HashMap<>();
         private final State initial;
 
-        private Class<State> fromType;
-        private Class<State> toType;
+        private Class<? extends State> fromType;
+        private Class<? extends State> toType;
 
         private boolean fastLookupsEnabled = false;
 
@@ -44,7 +46,6 @@ public class FiniteStateMachine {
             return new Builder(initial);
         }
 
-
         /**
          * Specifying the "from" and "to" state as enums enables high-performance mode where the configuration
          * is translated into a 2 dimensional array and allow O(1) time complexity when looking up the next
@@ -54,7 +55,7 @@ public class FiniteStateMachine {
          * @param toType   the to type
          * @return the builder
          */
-        public Builder with(Class<State> fromType, Class<State> toType) {
+        public BuilderUsingWithWrapper with(Class<? extends State> fromType, Class<? extends State> toType) {
             // TODO Both must implement State and be enums
             if (!fromType.isEnum()) {
                 throw new IllegalArgumentException("State " + fromType.getName() + " must be an enum");
@@ -65,17 +66,23 @@ public class FiniteStateMachine {
             this.fromType = fromType;
             this.toType = toType;
             this.fastLookupsEnabled = true;
-            return this;
+
+            return new BuilderUsingWithWrapper(this);
         }
 
-        private static final class BuilderUsingWithWrapper {
+        static final class BuilderUsingWithWrapper {
             private final Builder builder;
 
             private BuilderUsingWithWrapper(Builder builder) {
                 this.builder = builder;
             }
 
-            FiniteStateMachine build() {
+            public BuilderUsingWithWrapper transition(Event event, State from, State to, Consumer<Event> action) {
+                builder.transition(event, from, to, action);
+                return this;
+            }
+
+            public FiniteStateMachine build() {
                 return new FiniteStateMachine(builder);
             }
         }
@@ -86,16 +93,15 @@ public class FiniteStateMachine {
             return this;
         }
 
-        // TODO with(fromEnum, toEnum) which allows high-performance execution mode
-
-        // TODO .between(from, to).on(event).thenRun(action)
+        // TODO Fluid API - .between(from, to).on(event).thenRun(action)
         // TODO Each creates a new builder which only has the correct next fluent API call
 
         private StateTransitionTable getStateTransitionTable() {
+            Map<State, Map<Event, Transition>> unmodifiable = unmodifiableMap(transitions);
             if (fastLookupsEnabled) {
-                return new MatrixTransitions(transitions);
+                return new MatrixTransitions(unmodifiable);
             } else {
-                return new MappedTransitions(transitions);
+                return new MappedTransitions(unmodifiable);
             }
         }
 
