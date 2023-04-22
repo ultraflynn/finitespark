@@ -18,8 +18,8 @@ public class MultipleEventsTest {
         Event eventB = mock(Event.class, "eventB");
 
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
-                .transition(eventA, stateA, stateB, actual::set)
-                .transition(eventB, stateA, stateB, actual::set)
+                .between(stateA, stateB).on(eventA).thenRun(actual::set)
+                .between(stateA, stateB).on(eventB).thenRun(actual::set)
                 .build();
 
         fsm.handle(eventA);

@@ -27,8 +27,7 @@ public class FiniteStateMachineBuilderTest {
     @Test
     public void testSingleTransition() {
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(initial)
-                .transition(event, from, to, e -> {
-                })
+                .between(from, to).on(event).thenRun(e -> {})
                 .build();
         assertNotNull(fsm);
     }
@@ -37,8 +36,7 @@ public class FiniteStateMachineBuilderTest {
     public void testUsingWith() {
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(initial)
                 .with(FromType.class, ToType.class)
-                .transition(event, from, to, e -> {
-                })
+                .between(from, to).on(event).thenRun(e -> {})
                 .build();
         assertNotNull(fsm);
     }

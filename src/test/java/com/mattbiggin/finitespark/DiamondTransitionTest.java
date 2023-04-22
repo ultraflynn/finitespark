@@ -22,10 +22,10 @@ public class DiamondTransitionTest {
         Event eventD = mock(Event.class, "eventD");
 
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
-                .transition(eventA, stateA, stateB, e -> eventCount.getAndIncrement())
-                .transition(eventB, stateA, stateC, e -> eventCount.getAndIncrement())
-                .transition(eventC, stateB, stateD, e -> eventCount.getAndIncrement())
-                .transition(eventD, stateC, stateD, e -> eventCount.getAndIncrement())
+                .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateC, stateD).on(eventD).thenRun(e -> eventCount.getAndIncrement())
                 .build();
 
         fsm.handle(eventA);
@@ -46,10 +46,10 @@ public class DiamondTransitionTest {
         Event eventD = mock(Event.class, "eventD");
 
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
-                .transition(eventA, stateA, stateB, e -> eventCount.getAndIncrement())
-                .transition(eventB, stateA, stateC, e -> eventCount.getAndIncrement())
-                .transition(eventC, stateB, stateD, e -> eventCount.getAndIncrement())
-                .transition(eventD, stateC, stateD, e -> eventCount.getAndIncrement())
+                .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateC, stateD).on(eventD).thenRun(e -> eventCount.getAndIncrement())
                 .build();
 
         fsm.handle(eventB);
@@ -70,10 +70,10 @@ public class DiamondTransitionTest {
         Event eventD = mock(Event.class, "eventD");
 
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
-                .transition(eventA, stateA, stateB, e -> eventCount.getAndIncrement())
-                .transition(eventB, stateA, stateC, e -> eventCount.getAndIncrement())
-                .transition(eventC, stateB, stateD, e -> eventCount.getAndIncrement())
-                .transition(eventD, stateC, stateD, e -> eventCount.getAndIncrement())
+                .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())
+                .between(stateC, stateD).on(eventD).thenRun(e -> eventCount.getAndIncrement())
                 .build();
 
         fsm.handle(eventA);

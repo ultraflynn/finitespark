@@ -16,7 +16,7 @@ public class RecursiveTransitionTest {
         Event eventA = mock(Event.class, "eventA");
 
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
-                .transition(eventA, stateA, stateA, e -> eventCount.getAndIncrement())
+                .between(stateA, stateA).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .build();
 
         // TODO The negative condition to make this work is a hack. Think that through better

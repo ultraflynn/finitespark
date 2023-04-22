@@ -34,17 +34,17 @@ public class ComplexEventFlowTest {
 
         Consumer<Event> action = e -> eventCount.getAndIncrement();
         FiniteStateMachine fsm = FiniteStateMachine.Builder.create(setup)
-                .transition(addPlayer, setup, setup, action)
-                .transition(placeStartTile, setup, readyForTile, action)
-                .transition(placeTile, readyForTile, validatingTile, action)
-                .transition(rejectTile, validatingTile, readyForTile, action)
-                .transition(acceptTile, validatingTile, readyForMeeple, action)
-                .transition(placeMeeple, readyForMeeple, validatingMeeple, action)
-                .transition(rejectMeeple, validatingMeeple, readyForMeeple, action)
-                .transition(acceptMeeple, validatingMeeple, roundScoring, action)
-                .transition(declineMeeple, readyForMeeple, roundScoring, action)
-                .transition(moreTilesAvailable, roundScoring, readyForTile, action)
-                .transition(tileStackEmpty, roundScoring, finalScoring, action)
+                .between(setup, setup).on(addPlayer).thenRun(action)
+                .between(setup, readyForTile).on(placeStartTile).thenRun(action)
+                .between(readyForTile, validatingTile).on(placeTile).thenRun(action)
+                .between(validatingTile, readyForTile).on(rejectTile).thenRun(action)
+                .between(validatingTile, readyForMeeple).on(acceptTile).thenRun(action)
+                .between(readyForMeeple, validatingMeeple).on(placeMeeple).thenRun(action)
+                .between(validatingMeeple, readyForMeeple).on(rejectMeeple).thenRun(action)
+                .between(validatingMeeple, roundScoring).on(acceptMeeple).thenRun(action)
+                .between(readyForMeeple, roundScoring).on(declineMeeple).thenRun(action)
+                .between(roundScoring, readyForTile).on(moreTilesAvailable).thenRun(action)
+                .between(roundScoring, finalScoring).on(tileStackEmpty).thenRun(action)
                 .build();
 
         fsm.handle(addPlayer);
