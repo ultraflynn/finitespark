@@ -21,7 +21,7 @@ public class SimpleTransitionTest {
         State stateB = mock(State.class, "eventB");
         Event eventA = mock(Event.class, "eventA");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(actual::set)
                 .build();
 
@@ -37,7 +37,7 @@ public class SimpleTransitionTest {
         Event eventA = mock(Event.class, "eventA");
         Event eventB = mock(Event.class, "eventB");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(actual::set)
                 .build();
 

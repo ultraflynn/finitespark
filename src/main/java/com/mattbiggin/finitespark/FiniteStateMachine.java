@@ -8,23 +8,29 @@ import static java.util.Collections.unmodifiableMap;
 
 public class FiniteStateMachine {
     private final StateTransitionTable transitions;
+    private final Consumer<Event> defaultAction;
 
     private State currentState;
 
     private FiniteStateMachine(InternalBuilder builder) {
         transitions = builder.getStateTransitionTable();
         currentState = builder.getInitialState();
+        defaultAction = builder.defaultAction;
     }
 
     public void handle(Event event) {
-        // TODO The challenge now is to create a data structure that makes this method efficient
         Map<Event, Transition> events = transitions.lookup(currentState);
+        // TODO Refactor this construct
         if (events != null) {
             Transition transition = events.get(event);
             if (transition != null) {
                 transition.action().accept(event);
                 currentState = transition.state();
+            } else {
+                defaultAction.accept(event);
             }
+        } else {
+            defaultAction.accept(event);
         }
     }
 
@@ -38,6 +44,8 @@ public class FiniteStateMachine {
         private Event event;
         private State to;
         private State from;
+
+        private Consumer<Event> defaultAction;
 
         private boolean fastLookupsEnabled = false;
 
@@ -61,13 +69,53 @@ public class FiniteStateMachine {
         }
     }
 
-    public interface Builder extends WithBuilder, BetweenBuilder {
-        static FiniteStateMachine.Builder create(State initial) {
+    public interface Builder extends StartVerb {
+        static Builder withInitial(State initial) {
             InternalBuilder builder = new InternalBuilder(initial);
 
             return new Builder() {
                 @Override
-                public BetweenBuilder with(Class<? extends State> fromType, Class<? extends State> toType) {
+                public OnVerb between(State from, State to) {
+                    return betweenVerb.between(from, to);
+                }
+
+                @Override
+                public BetweenVerb with(Class<? extends State> fromType, Class<? extends State> toType) {
+                    return withVerb.with(fromType, toType);
+                }
+
+                private final RepeatVerb repeatVerb = new RepeatVerb() {
+                    @Override
+                    public OnVerb between(State from, State to) {
+                        return betweenVerb.between(from, to);
+                    }
+
+                    @Override
+                    public FiniteStateMachine build() {
+                        return buildVerb.build();
+                    }
+
+                    @Override
+                    public BuildVerb orDefault(Consumer<Event> action) {
+                        return orDefaultVerb.orDefault(action);
+                    }
+                };
+
+                private final ThenRunVerb thenRunVerb = action -> {
+                    Map<Event, Transition> events = builder.transitions.computeIfAbsent(builder.from, e -> new HashMap<>());
+                    events.put(builder.event, new Transition(builder.to, action));
+                    return repeatVerb;
+                };
+                private final OnVerb onVerb = event -> {
+                    builder.event = event;
+                    return thenRunVerb;
+                };
+                private final BetweenVerb betweenVerb = (from, to) -> {
+                    builder.from = from;
+                    builder.to = to;
+                    return onVerb;
+                };
+                private final WithVerb withVerb = (fromType, toType) -> {
                     if (!fromType.isEnum()) {
                         throw new IllegalArgumentException("State " + fromType.getName() + " must be an enum");
                     }
@@ -78,65 +126,47 @@ public class FiniteStateMachine {
                     builder.fastLookupsEnabled = true;
                     builder.fromType = fromType;
                     builder.toType = toType;
-
-//            return new BetweenBuilderImpl(builder);
-                    return betweenBuilder;
-                }
-
-                @Override
-                public OnBuilder between(State from, State to) {
-                    return betweenBuilder.between(from, to);
-                }
-
-                private final TerminalBuilder terminalBuilder = new TerminalBuilder() {
-                    @Override
-                    public FiniteStateMachine build() {
-                        return new FiniteStateMachine(builder);
-                    }
-
-                    @Override
-                    public OnBuilder between(State from, State to) {
-                        return betweenBuilder.between(from, to);
-                    }
+                    return betweenVerb;
                 };
-
-                private final ThenRunBuilder thenRunBuilder = action -> {
-                    Map<Event, Transition> events = builder.transitions.computeIfAbsent(builder.from, e -> new HashMap<>());
-                    events.put(builder.event, new Transition(builder.to, action));
-                    return terminalBuilder;
-                };
-
-                private final OnBuilder onBuilder = event -> {
-                    builder.event = event;
-                    return thenRunBuilder;
-                };
-
-                private final BetweenBuilder betweenBuilder = (from, to) -> {
-                    builder.from = from;
-                    builder.to = to;
-                    return onBuilder;
+                private final BuildVerb buildVerb = () -> new FiniteStateMachine(builder);
+                private final OrDefaultVerb orDefaultVerb = action -> {
+                    builder.defaultAction = action;
+                    return buildVerb;
                 };
             };
         }
     }
 
-    public interface WithBuilder {
-        BetweenBuilder with(Class<? extends State> fromType, Class<? extends State> toType);
+    public interface StartVerb extends WithVerb, BetweenVerb {}
+    public interface RepeatVerb extends BetweenVerb, OrDefaultVerb, BuildVerb {}
+
+    @FunctionalInterface
+    public interface WithVerb {
+        BetweenVerb with(Class<? extends State> fromType, Class<? extends State> toType);
     }
 
-    public interface BetweenBuilder {
-        OnBuilder between(State from, State to);
+    @FunctionalInterface
+    public interface BetweenVerb {
+        OnVerb between(State from, State to);
     }
 
-    public interface OnBuilder {
-        ThenRunBuilder on(Event event);
+    @FunctionalInterface
+    public interface OnVerb {
+        ThenRunVerb on(Event event);
     }
 
-    public interface ThenRunBuilder {
-        TerminalBuilder thenRun(Consumer<Event> action);
+    @FunctionalInterface
+    public interface ThenRunVerb {
+        RepeatVerb thenRun(Consumer<Event> action);
     }
 
-    public interface TerminalBuilder extends BetweenBuilder {
+    @FunctionalInterface
+    public interface OrDefaultVerb {
+        BuildVerb orDefault(Consumer<Event> action);
+    }
+
+    @FunctionalInterface
+    public interface BuildVerb {
         FiniteStateMachine build();
     }
 }

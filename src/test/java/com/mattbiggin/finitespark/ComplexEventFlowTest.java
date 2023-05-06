@@ -33,7 +33,7 @@ public class ComplexEventFlowTest {
         Event tileStackEmpty = mock(Event.class, "tileStackEmpty");
 
         Consumer<Event> action = e -> eventCount.getAndIncrement();
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(setup)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(setup)
                 .between(setup, setup).on(addPlayer).thenRun(action)
                 .between(setup, readyForTile).on(placeStartTile).thenRun(action)
                 .between(readyForTile, validatingTile).on(placeTile).thenRun(action)

@@ -17,7 +17,7 @@ public class MultipleEventsTest {
         Event eventA = mock(Event.class, "eventA");
         Event eventB = mock(Event.class, "eventB");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(actual::set)
                 .between(stateA, stateB).on(eventB).thenRun(actual::set)
                 .build();

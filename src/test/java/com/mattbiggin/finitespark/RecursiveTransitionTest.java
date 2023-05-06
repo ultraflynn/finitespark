@@ -15,7 +15,7 @@ public class RecursiveTransitionTest {
         State stateA = mock(State.class, "stateA");
         Event eventA = mock(Event.class, "eventA");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateA).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .build();
 

@@ -21,7 +21,7 @@ public class DiamondTransitionTest {
         Event eventC = mock(Event.class, "eventC");
         Event eventD = mock(Event.class, "eventD");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())
@@ -45,7 +45,7 @@ public class DiamondTransitionTest {
         Event eventC = mock(Event.class, "eventC");
         Event eventD = mock(Event.class, "eventD");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())
@@ -69,7 +69,7 @@ public class DiamondTransitionTest {
         Event eventC = mock(Event.class, "eventC");
         Event eventD = mock(Event.class, "eventD");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateA, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateB, stateD).on(eventC).thenRun(e -> eventCount.getAndIncrement())

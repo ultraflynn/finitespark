@@ -18,7 +18,7 @@ public class MultipleTransitionTest {
         Event eventA = mock(Event.class, "eventA");
         Event eventB = mock(Event.class, "eventB");
 
-        FiniteStateMachine fsm = FiniteStateMachine.Builder.create(stateA)
+        FiniteStateMachine fsm = FiniteStateMachine.Builder.withInitial(stateA)
                 .between(stateA, stateB).on(eventA).thenRun(e -> eventCount.getAndIncrement())
                 .between(stateB, stateC).on(eventB).thenRun(e -> eventCount.getAndIncrement())
                 .build();

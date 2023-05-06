@@ -25,7 +25,7 @@ public class BuilderVisibilityTest {
 
     @Test
     public void testBuilderUsingWithForVisibility() {
-        FiniteStateMachine.Builder.create(initial)
+        FiniteStateMachine.Builder.withInitial(initial)
                 .with(From.class, To.class)
                 .between(from, to)
                 .on(event)
@@ -35,7 +35,7 @@ public class BuilderVisibilityTest {
 
     @Test
     public void testBuilderUsingBetweenForVisibility() {
-        FiniteStateMachine.Builder.create(initial)
+        FiniteStateMachine.Builder.withInitial(initial)
                 .between(from, to)
                 .on(event)
                 .thenRun(e -> {})

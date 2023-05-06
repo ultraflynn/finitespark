@@ -14,4 +14,3 @@ example.
 ## TODO
 
 - One of the main features of this is going to be in its ability to visualise the configuration of the machine
-- Add default actions. Rather than ignore (do nothing), run a specific action.
