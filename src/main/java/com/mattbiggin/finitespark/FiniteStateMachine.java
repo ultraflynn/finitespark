@@ -69,7 +69,7 @@ public class FiniteStateMachine {
         }
     }
 
-    public interface Builder extends StartVerb {
+    public interface Builder extends Start {
         static Builder withInitial(State initial) {
             InternalBuilder builder = new InternalBuilder(initial);
 
@@ -84,7 +84,7 @@ public class FiniteStateMachine {
                     return withVerb.with(fromType, toType);
                 }
 
-                private final RepeatVerb repeatVerb = new RepeatVerb() {
+                private final Repeat repeat = new Repeat() {
                     @Override
                     public OnVerb between(State from, State to) {
                         return betweenVerb.between(from, to);
@@ -104,7 +104,7 @@ public class FiniteStateMachine {
                 private final ThenRunVerb thenRunVerb = action -> {
                     Map<Event, Transition> events = builder.transitions.computeIfAbsent(builder.from, e -> new HashMap<>());
                     events.put(builder.event, new Transition(builder.to, action));
-                    return repeatVerb;
+                    return repeat;
                 };
                 private final OnVerb onVerb = event -> {
                     builder.event = event;
@@ -137,8 +137,8 @@ public class FiniteStateMachine {
         }
     }
 
-    public interface StartVerb extends WithVerb, BetweenVerb {}
-    public interface RepeatVerb extends BetweenVerb, OrDefaultVerb, BuildVerb {}
+    public interface Start extends WithVerb, BetweenVerb {}
+    public interface Repeat extends BetweenVerb, OrDefaultVerb, BuildVerb {}
 
     @FunctionalInterface
     public interface WithVerb {
@@ -157,7 +157,7 @@ public class FiniteStateMachine {
 
     @FunctionalInterface
     public interface ThenRunVerb {
-        RepeatVerb thenRun(Consumer<Event> action);
+        Repeat thenRun(Consumer<Event> action);
     }
 
     @FunctionalInterface
